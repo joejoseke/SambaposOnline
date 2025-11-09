@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { Table, Ticket, MenuItem, ViewType, TicketItem } from './types';
+import type { Table, Ticket, MenuItem, ViewType, TicketItem, User } from './types';
 import { TABLES_DATA } from './constants';
 import TableView from './components/TableView';
 import OrderingView from './components/OrderingView';
@@ -10,7 +10,7 @@ import LoginView from './components/LoginView';
 import MobileDashboardView from './components/MobileDashboardView';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [tables, setTables] = useState<Table[]>(TABLES_DATA);
   const [tickets, setTickets] = useState<Map<string, Ticket>>(new Map());
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
@@ -25,17 +25,14 @@ const App: React.FC = () => {
     return Array.from(tickets.values()).filter(t => t.status === 'paid');
   }, [tickets]);
 
-  const handleLogin = useCallback(() => {
-    setIsAuthenticated(true);
+  const handleLogin = useCallback((user: User) => {
+    setCurrentUser(user);
   }, []);
 
   const handleLogout = useCallback(() => {
-    setIsAuthenticated(false);
+    setCurrentUser(null);
     setActiveTicketId(null);
     setCurrentView('TABLES');
-    // Optionally reset tables and tickets to initial state
-    // setTables(TABLES_DATA);
-    // setTickets(new Map());
   }, []);
 
   const handleSelectTable = useCallback((tableId: string) => {
@@ -167,10 +164,12 @@ const App: React.FC = () => {
   }, []);
   
   const handleGoToMobileDashboard = useCallback(() => {
-    setCurrentView('MOBILE_DASHBOARD');
-  }, []);
+    if (currentUser?.role === 'admin') {
+      setCurrentView('MOBILE_DASHBOARD');
+    }
+  }, [currentUser]);
 
-  if (!isAuthenticated) {
+  if (!currentUser) {
     return <LoginView onLogin={handleLogin} />;
   }
 
@@ -208,6 +207,7 @@ const App: React.FC = () => {
       {currentView !== 'MOBILE_DASHBOARD' && (
         <Header 
           currentView={currentView} 
+          userRole={currentUser.role}
           onHomeClick={handleCloseOrderView} 
           onLogout={handleLogout} 
           onMobileDashboardClick={handleGoToMobileDashboard}

@@ -1,5 +1,10 @@
 
-import type { MenuItem, Table, Category } from './types';
+import type { MenuItem, Table, Category, User } from './types';
+
+export const USERS: User[] = [
+  { id: 'u1', username: 'admin', password: 'password', role: 'admin' },
+  { id: 'u2', username: 'service', password: 'password', role: 'service' },
+];
 
 export const MENU_ITEMS: MenuItem[] = [
   { id: 'm1', name: 'Classic Burger', price: 12.99, category: 'Burgers' },

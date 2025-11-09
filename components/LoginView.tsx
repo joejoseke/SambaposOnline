@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
 import { Squares2X2Icon } from './common/icons';
+import type { User } from '../types';
+import { USERS } from '../constants';
 
 interface LoginViewProps {
-  onLogin: () => void;
+  onLogin: (user: User) => void;
 }
 
 const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
@@ -13,10 +15,11 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Hardcoded credentials for demonstration
-    if (username === 'admin' && password === 'password') {
+    const foundUser = USERS.find(user => user.username === username && user.password === password);
+
+    if (foundUser) {
       setError('');
-      onLogin();
+      onLogin(foundUser);
     } else {
       setError('Invalid username or password.');
     }
@@ -76,8 +79,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
               Sign in
             </button>
           </div>
-          <div className="text-center text-sm text-gray-500">
-            <p>Use <strong>admin</strong> / <strong>password</strong> to login.</p>
+          <div className="text-center text-sm text-gray-500 space-y-1">
+            <p>Admin: <strong>admin</strong> / <strong>password</strong></p>
+            <p>Service: <strong>service</strong> / <strong>password</strong></p>
           </div>
         </form>
       </div>

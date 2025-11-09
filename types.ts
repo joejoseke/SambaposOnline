@@ -30,3 +30,12 @@ export interface Table {
 export type ViewType = 'TABLES' | 'ORDERING' | 'PAYMENT' | 'MOBILE_DASHBOARD';
 
 export type Category = string;
+
+export type UserRole = 'admin' | 'service';
+
+export interface User {
+  id: string;
+  username: string;
+  role: UserRole;
+  password?: string; // For simulation purposes
+}

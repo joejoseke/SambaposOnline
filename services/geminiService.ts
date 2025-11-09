@@ -2,17 +2,11 @@
 import { GoogleGenAI } from "@google/genai";
 import type { TicketItem } from '../types';
 
-// IMPORTANT: This key is a placeholder and should be handled via environment variables in a real application.
-// For this environment, it's assumed `process.env.API_KEY` is available.
-const apiKey = process.env.API_KEY;
-if (!apiKey) {
-    console.warn("API_KEY environment variable not set. AI features will not work.");
-}
-
-const ai = new GoogleGenAI({ apiKey: apiKey || "" });
+// Fix: Switched from `import.meta.env.VITE_API_KEY` to `process.env.API_KEY` to resolve the TypeScript error and adhere to the @google/genai coding guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
 
 export async function getUpsellSuggestions(items: TicketItem[]): Promise<string> {
-    if (!apiKey) {
+    if (!process.env.API_KEY) {
         return "AI features are disabled because the API key is not configured.";
     }
 
