@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import type { Ticket } from '../types';
 import { PowerIcon, ChartBarIcon, CurrencyDollarIcon, ShoppingCartIcon } from './common/icons';
 
-interface MobileDashboardViewProps {
+interface DirectorDashboardViewProps {
     paidTickets: Ticket[];
     onLogout: () => void;
 }
@@ -30,7 +30,7 @@ const ReportCard: React.FC<{ title: string; children: React.ReactNode }> = ({ ti
     </div>
 );
 
-const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, onLogout }) => {
+const MobileDashboardView: React.FC<DirectorDashboardViewProps> = ({ paidTickets, onLogout }) => {
 
     const reportData = useMemo(() => {
         const totalRevenue = paidTickets.reduce((sum, ticket) => sum + ticket.total, 0);

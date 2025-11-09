@@ -4,12 +4,18 @@ import { ArrowLeftIcon, CreditCardIcon, BanknotesIcon } from './common/icons';
 
 interface PaymentViewProps {
   ticket: Ticket;
-  onProcessPayment: () => void;
+  onProcessPayment: (paymentMethod: 'cash' | 'card') => void;
   onBack: () => void;
 }
 
 const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onBack }) => {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | null>(null);
+
+  const handleConfirm = () => {
+    if (paymentMethod) {
+        onProcessPayment(paymentMethod);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
@@ -48,7 +54,7 @@ const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onB
 
         <div className="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl">
           <button
-            onClick={onProcessPayment}
+            onClick={handleConfirm}
             disabled={!paymentMethod}
             className="w-full bg-green-600 text-white font-bold py-4 rounded-lg text-xl hover:bg-green-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600"
           >

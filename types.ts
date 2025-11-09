@@ -1,8 +1,21 @@
+export interface StockItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: 'pcs' | 'g' | 'ml';
+}
+
+export interface RecipeItem {
+  stockItemId: string;
+  quantity: number;
+}
+
 export interface MenuItem {
   id: string;
   name: string;
   price: number;
   category: string;
+  recipe: RecipeItem[];
 }
 
 export interface TicketItem {
@@ -18,6 +31,8 @@ export interface Ticket {
   tax: number;
   total: number;
   status: 'open' | 'paid' | 'void';
+  paymentMethod?: 'cash' | 'card';
+  paidAt?: string;
 }
 
 export interface Table {
@@ -26,11 +41,17 @@ export interface Table {
   status: 'available' | 'occupied';
 }
 
-export type ViewType = 'ORDERING' | 'PAYMENT' | 'MOBILE_DASHBOARD';
+export type ViewType = 
+  | 'ORDERING' 
+  | 'PAYMENT' 
+  | 'DIRECTOR_DASHBOARD'
+  | 'PROCUREMENT_DASHBOARD'
+  | 'ACCOUNTANT_DASHBOARD'
+  | 'MANAGER_DASHBOARD';
 
 export type Category = string;
 
-export type UserRole = 'waiter' | 'cashier' | 'director';
+export type UserRole = 'waiter' | 'cashier' | 'director' | 'procurement' | 'accountant' | 'manager';
 
 export interface User {
   id:string;

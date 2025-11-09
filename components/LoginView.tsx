@@ -91,11 +91,14 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
           <KeypadButton onClick={handleLogin}><ArrowRightCircleIcon className="h-8 w-8 text-green-500"/></KeypadButton>
         </div>
         
-        <div className="text-center text-xs text-gray-500 dark:text-gray-400">
-          <p>For testing:</p>
-          <p>Waiter PIN: 2020</p>
-          <p>Cashier PIN: 2030</p>
-          <p>Director PIN: 2040</p>
+        <div className="text-center text-xs text-gray-500 dark:text-gray-400 p-2 bg-gray-100 dark:bg-gray-800 rounded-md">
+          <p className="font-bold mb-1">For testing:</p>
+          <p>Waiter PIN: 1111</p>
+          <p>Cashier PIN: 2222</p>
+          <p>Procurement PIN: 3333</p>
+          <p>Accountant PIN: 4444</p>
+          <p>Manager PIN: 5555</p>
+          <p>Director PIN: 6666</p>
         </div>
       </div>
        <style>{`

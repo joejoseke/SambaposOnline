@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Ticket, MenuItem, UserRole } from '../types';
-import { CATEGORIES, MENU_ITEMS } from '../constants';
+import { CATEGORIES } from '../constants';
 import CategoryList from './CategoryList';
 import MenuList from './MenuList';
 import TicketView from './TicketView';
@@ -13,6 +13,8 @@ interface OrderingViewProps {
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onGoToPayment: () => void;
   onClose: () => void;
+  menuItems: MenuItem[];
+  checkStockAvailability: (item: MenuItem) => boolean;
 }
 
 const OrderingView: React.FC<OrderingViewProps> = ({
@@ -21,19 +23,21 @@ const OrderingView: React.FC<OrderingViewProps> = ({
   onAddItem,
   onUpdateQuantity,
   onGoToPayment,
-  onClose
+  onClose,
+  menuItems,
+  checkStockAvailability
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORIES[0]);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileView, setMobileView] = useState<'menu' | 'ticket'>('menu');
 
   const filteredMenuItems = useMemo(() => {
-    return MENU_ITEMS.filter(item => {
+    return menuItems.filter(item => {
       const inCategory = item.category === selectedCategory;
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
       return inCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, menuItems]);
 
   // Mobile View
   const MobileLayout = () => (
@@ -59,7 +63,7 @@ const OrderingView: React.FC<OrderingViewProps> = ({
               </div>
             </div>
             <div className="px-4 pb-4">
-              <MenuList items={filteredMenuItems} onAddItem={onAddItem} />
+              <MenuList items={filteredMenuItems} onAddItem={onAddItem} checkStockAvailability={checkStockAvailability} />
             </div>
           </div>
         ) : (
@@ -115,7 +119,7 @@ const OrderingView: React.FC<OrderingViewProps> = ({
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
         <div className="flex-1 overflow-y-auto">
-           <MenuList items={filteredMenuItems} onAddItem={onAddItem} />
+           <MenuList items={filteredMenuItems} onAddItem={onAddItem} checkStockAvailability={checkStockAvailability} />
         </div>
       </div>
       
