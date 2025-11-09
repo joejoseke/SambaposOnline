@@ -1,12 +1,23 @@
+
 import { GoogleGenAI } from "@google/genai";
 import type { TicketItem } from '../types';
 
-// FIX: Aligned with coding guidelines to use `process.env.API_KEY`.
-// This resolves the TypeScript error regarding `import.meta.env` and
-// removes the conditional initialization, assuming the API key is always present.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// FIX: Switched from `import.meta.env.VITE_API_KEY` to `process.env.API_KEY` to adhere to coding guidelines. This also resolves the TypeScript error.
+const apiKey = process.env.API_KEY;
+
+let ai: GoogleGenAI | null = null;
+
+if (apiKey) {
+  ai = new GoogleGenAI({ apiKey });
+} else {
+  console.error("API_KEY is not defined. Please set it in your environment variables.");
+}
 
 export async function getUpsellSuggestions(items: TicketItem[]): Promise<string> {
+    if (!ai) {
+      return "AI service is not configured. Please check your API key.";
+    }
+
     const model = 'gemini-2.5-flash';
     
     const itemNames = items.map(item => `${item.quantity}x ${item.menuItem.name}`).join(', ');
