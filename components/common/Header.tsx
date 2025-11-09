@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { ViewType, UserRole } from '../../types';
 import { HomeIcon, Squares2X2Icon, PowerIcon, DevicePhoneMobileIcon } from './icons';
@@ -16,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, userRole, onHomeClick, onL
     <header className="bg-brand-primary text-white shadow-lg flex items-center justify-between p-4">
       <div className="flex items-center gap-3">
         <Squares2X2Icon className="h-8 w-8" />
-        <h1 className="text-2xl font-bold">React POS Pro</h1>
+        <h1 className="text-2xl font-bold">Neon Online POS</h1>
       </div>
       <div className="flex items-center gap-4">
         {currentView !== 'TABLES' && (

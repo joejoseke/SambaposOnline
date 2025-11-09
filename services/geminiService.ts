@@ -1,15 +1,12 @@
-
 import { GoogleGenAI } from "@google/genai";
 import type { TicketItem } from '../types';
 
-// Fix: Switched from `import.meta.env.VITE_API_KEY` to `process.env.API_KEY` to resolve the TypeScript error and adhere to the @google/genai coding guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+// FIX: Aligned with coding guidelines to use `process.env.API_KEY`.
+// This resolves the TypeScript error regarding `import.meta.env` and
+// removes the conditional initialization, assuming the API key is always present.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export async function getUpsellSuggestions(items: TicketItem[]): Promise<string> {
-    if (!process.env.API_KEY) {
-        return "AI features are disabled because the API key is not configured.";
-    }
-
     const model = 'gemini-2.5-flash';
     
     const itemNames = items.map(item => `${item.quantity}x ${item.menuItem.name}`).join(', ');
@@ -28,7 +25,10 @@ export async function getUpsellSuggestions(items: TicketItem[]): Promise<string>
         });
         return response.text;
     } catch (error) {
-        console.error(`Error calling Gemini API: ${error}`);
+        console.error(`Error calling Gemini API:`, error);
+        if (error instanceof Error && error.message.includes('API key not valid')) {
+            return "The provided API key is not valid. Please check your configuration.";
+        }
         throw new Error('Failed to get suggestion from AI model.');
     }
 }

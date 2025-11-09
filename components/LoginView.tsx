@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Squares2X2Icon } from './common/icons';
 import type { User } from '../types';
@@ -31,7 +30,7 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
         <div className="flex flex-col items-center">
           <div className="flex items-center gap-3 text-brand-primary dark:text-brand-light mb-4">
             <Squares2X2Icon className="h-10 w-10" />
-            <h1 className="text-4xl font-bold">React POS Pro</h1>
+            <h1 className="text-4xl font-bold">Neon Online POS</h1>
           </div>
           <p className="text-text-secondary dark:text-text-dark-secondary">Please sign in to continue</p>
         </div>
