@@ -27,6 +27,6 @@ export interface Table {
   status: 'available' | 'occupied';
 }
 
-export type ViewType = 'TABLES' | 'ORDERING' | 'PAYMENT';
+export type ViewType = 'TABLES' | 'ORDERING' | 'PAYMENT' | 'MOBILE_DASHBOARD';
 
 export type Category = string;

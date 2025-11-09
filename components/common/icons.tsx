@@ -9,7 +9,7 @@ export const TableIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 export const UserGroupIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m-7.5-2.952a4.5 4.5 0 0 1 4.5 0m-4.5 0a4.5 4.5 0 0 0-4.5 0m3.75-9a3.375 3.375 0 0 1 3.375 0m-3.375 0a3.375 3.375 0 0 0-3.375 0M9 13.5m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m12 0a9.094 9.094 0 0 0-9.563 0m9.563 0a9.094 9.094 0 0 1-9.563 0" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m-7.5-2.952a4.5 4.5 0 0 1 4.5 0m-4.5 0a4.5 4.5 0 0 0-4.5 0m3.75-9a3.375 3.375 0 0 1 3.375 0m-3.75 0a3.375 3.375 0 0 0-3.375 0M9 13.5m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0m12 0a9.094 9.094 0 0 0-9.563 0m9.563 0a9.094 9.094 0 0 1-9.563 0" />
   </svg>
 );
 
@@ -71,4 +71,28 @@ export const PowerIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
     </svg>
+);
+
+export const DevicePhoneMobileIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75A2.25 2.25 0 0 0 15.75 1.5h-2.25m-3.75 0h3.75M12 18.75h.008v.008H12v-.008Z" />
+    </svg>
+);
+
+export const ChartBarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+  </svg>
+);
+
+export const CurrencyDollarIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182.97-.728 2.25-.728 3.22 0l.942.659M7.5 21a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H7.5" />
+  </svg>
+);
+
+export const ShoppingCartIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c.51 0 .962-.343 1.087-.835l1.823-6.823a.75.75 0 0 0-.25-.823l-4.5-3.25a.75.75 0 0 0-.823.25l-2.845 5.25a.75.75 0 0 0 .316 1.061l2.14 1.14a.75.75 0 0 1 0 1.292l-2.14 1.14a.75.75 0 0 0-.316 1.061l2.845 5.25a.75.75 0 0 0 .823.25l4.5-3.25a.75.75 0 0 0 .25-.823l-1.823-6.823A1.125 1.125 0 0 0 18.217 5.25H5.25" />
+  </svg>
 );

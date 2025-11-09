@@ -7,6 +7,7 @@ import OrderingView from './components/OrderingView';
 import PaymentView from './components/PaymentView';
 import Header from './components/common/Header';
 import LoginView from './components/LoginView';
+import MobileDashboardView from './components/MobileDashboardView';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -19,6 +20,10 @@ const App: React.FC = () => {
     if (!activeTicketId) return null;
     return tickets.get(activeTicketId) || null;
   }, [activeTicketId, tickets]);
+
+  const paidTickets = useMemo(() => {
+    return Array.from(tickets.values()).filter(t => t.status === 'paid');
+  }, [tickets]);
 
   const handleLogin = useCallback(() => {
     setIsAuthenticated(true);
@@ -160,17 +165,21 @@ const App: React.FC = () => {
     setActiveTicketId(null);
     setCurrentView('TABLES');
   }, []);
+  
+  const handleGoToMobileDashboard = useCallback(() => {
+    setCurrentView('MOBILE_DASHBOARD');
+  }, []);
 
   if (!isAuthenticated) {
     return <LoginView onLogin={handleLogin} />;
   }
 
-  return (
-    <div className="h-screen w-screen flex flex-col font-sans bg-surface-main dark:bg-surface-dark text-text-main dark:text-text-dark-main overflow-hidden">
-      <Header currentView={currentView} onHomeClick={handleCloseOrderView} onLogout={handleLogout} />
-      <main className="flex-1 overflow-hidden">
-        {currentView === 'TABLES' && <TableView tables={tables} onSelectTable={handleSelectTable} />}
-        {currentView === 'ORDERING' && activeTicket && (
+  const renderContent = () => {
+    switch(currentView) {
+      case 'TABLES':
+        return <TableView tables={tables} onSelectTable={handleSelectTable} />;
+      case 'ORDERING':
+        return activeTicket && (
           <OrderingView
             ticket={activeTicket}
             onAddItem={handleAddItemToTicket}
@@ -178,14 +187,34 @@ const App: React.FC = () => {
             onGoToPayment={handleGoToPayment}
             onClose={handleCloseOrderView}
           />
-        )}
-        {currentView === 'PAYMENT' && activeTicket && (
+        );
+      case 'PAYMENT':
+        return activeTicket && (
           <PaymentView
             ticket={activeTicket}
             onProcessPayment={handleProcessPayment}
             onBack={() => setCurrentView('ORDERING')}
           />
-        )}
+        );
+      case 'MOBILE_DASHBOARD':
+        return <MobileDashboardView paidTickets={paidTickets} onBackToPOS={handleCloseOrderView} />;
+      default:
+        return <TableView tables={tables} onSelectTable={handleSelectTable} />;
+    }
+  }
+
+  return (
+    <div className="h-screen w-screen flex flex-col font-sans bg-surface-main dark:bg-surface-dark text-text-main dark:text-text-dark-main overflow-hidden">
+      {currentView !== 'MOBILE_DASHBOARD' && (
+        <Header 
+          currentView={currentView} 
+          onHomeClick={handleCloseOrderView} 
+          onLogout={handleLogout} 
+          onMobileDashboardClick={handleGoToMobileDashboard}
+        />
+      )}
+      <main className="flex-1 overflow-hidden">
+        {renderContent()}
       </main>
     </div>
   );
