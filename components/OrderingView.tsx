@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import type { Ticket, MenuItem } from '../types';
+import type { Ticket, MenuItem, UserRole } from '../types';
 import { CATEGORIES, MENU_ITEMS } from '../constants';
 import CategoryList from './CategoryList';
 import MenuList from './MenuList';
@@ -8,6 +8,7 @@ import { MagnifyingGlassIcon, Bars3Icon, TicketIcon } from './common/icons';
 
 interface OrderingViewProps {
   ticket: Ticket;
+  userRole: UserRole;
   onAddItem: (item: MenuItem) => void;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onGoToPayment: () => void;
@@ -16,6 +17,7 @@ interface OrderingViewProps {
 
 const OrderingView: React.FC<OrderingViewProps> = ({
   ticket,
+  userRole,
   onAddItem,
   onUpdateQuantity,
   onGoToPayment,
@@ -66,6 +68,7 @@ const OrderingView: React.FC<OrderingViewProps> = ({
             onUpdateQuantity={onUpdateQuantity}
             onGoToPayment={onGoToPayment}
             onClose={onClose}
+            userRole={userRole}
           />
         )}
       </div>
@@ -122,6 +125,7 @@ const OrderingView: React.FC<OrderingViewProps> = ({
           onUpdateQuantity={onUpdateQuantity}
           onGoToPayment={onGoToPayment}
           onClose={onClose}
+          userRole={userRole}
         />
       </div>
     </div>

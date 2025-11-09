@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import type { Ticket } from '../types';
-import { ArrowLeftIcon, ChartBarIcon, CurrencyDollarIcon, ShoppingCartIcon } from './common/icons';
+import { PowerIcon, ChartBarIcon, CurrencyDollarIcon, ShoppingCartIcon } from './common/icons';
 
 interface MobileDashboardViewProps {
     paidTickets: Ticket[];
-    onBackToPOS: () => void;
+    onLogout: () => void;
 }
 
 interface KpiCardProps {
@@ -30,7 +30,7 @@ const ReportCard: React.FC<{ title: string; children: React.ReactNode }> = ({ ti
     </div>
 );
 
-const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, onBackToPOS }) => {
+const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, onLogout }) => {
 
     const reportData = useMemo(() => {
         const totalRevenue = paidTickets.reduce((sum, ticket) => sum + ticket.total, 0);
@@ -80,11 +80,11 @@ const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, 
         <div className="h-full w-full bg-surface-dark text-text-dark-main flex flex-col">
             {/* Header */}
             <header className="flex-shrink-0 bg-surface-dark-card/50 backdrop-blur-sm p-4 flex items-center justify-between sticky top-0 z-10">
-                <button onClick={onBackToPOS} className="p-2 rounded-full hover:bg-white/10">
-                    <ArrowLeftIcon className="h-6 w-6" />
+                <h1 className="text-xl font-bold">Director Dashboard</h1>
+                 <button onClick={onLogout} className="flex items-center gap-2 px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                    <PowerIcon className="h-5 w-5" />
+                    <span className="font-semibold">Logout</span>
                 </button>
-                <h1 className="text-xl font-bold">Mobile Report</h1>
-                <div className="w-8"></div>
             </header>
 
             {/* Content */}

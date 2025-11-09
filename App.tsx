@@ -60,7 +60,11 @@ const App: React.FC = () => {
 
   const handleLogin = useCallback((user: User) => {
     setCurrentUser(user);
-    startNewOrder();
+    if (user.role === 'director') {
+      setCurrentView('MOBILE_DASHBOARD');
+    } else {
+      startNewOrder();
+    }
   }, [startNewOrder]);
 
   const handleLogout = useCallback(() => {
@@ -128,12 +132,16 @@ const App: React.FC = () => {
   }, [activeTicketId]);
   
   const handleGoToPayment = useCallback(() => {
+    if (currentUser?.role !== 'cashier') {
+      alert("You do not have permission to process payments.");
+      return;
+    }
     if (activeTicket && activeTicket.items.length > 0) {
       setCurrentView('PAYMENT');
     } else {
       alert("Cannot proceed to payment with an empty ticket.");
     }
-  }, [activeTicket]);
+  }, [activeTicket, currentUser]);
 
   const handleProcessPayment = useCallback(() => {
     if (!activeTicket) return;
@@ -160,16 +168,6 @@ const App: React.FC = () => {
         startNewOrder();
     }
   }, [activeTicket, startNewOrder]);
-  
-  const handleGoToMobileDashboard = useCallback(() => {
-    if (currentUser?.role === 'admin') {
-      setCurrentView('MOBILE_DASHBOARD');
-    }
-  }, [currentUser]);
-
-  const handleBackToPOS = useCallback(() => {
-    setCurrentView('ORDERING');
-  }, []);
 
   if (!currentUser) {
     return <LoginView onLogin={handleLogin} />;
@@ -185,6 +183,7 @@ const App: React.FC = () => {
             onUpdateQuantity={handleUpdateItemQuantity}
             onGoToPayment={handleGoToPayment}
             onClose={handleCancelOrder}
+            userRole={currentUser.role}
           />
         );
       case 'PAYMENT':
@@ -196,19 +195,18 @@ const App: React.FC = () => {
           />
         );
       case 'MOBILE_DASHBOARD':
-        return <MobileDashboardView paidTickets={paidTickets} onBackToPOS={handleBackToPOS} />;
+        return <MobileDashboardView paidTickets={paidTickets} onLogout={handleLogout} />;
       default:
-        return null; // Should not happen as a ticket is created on login
+        return null;
     }
   }
 
   return (
     <div className="h-screen w-screen flex flex-col font-sans bg-surface-main dark:bg-surface-dark text-text-main dark:text-text-dark-main overflow-hidden">
-      {currentView !== 'MOBILE_DASHBOARD' && (
+      {currentUser.role !== 'director' && (
         <Header 
           userRole={currentUser.role}
           onLogout={handleLogout} 
-          onMobileDashboardClick={handleGoToMobileDashboard}
           theme={theme}
           onToggleTheme={toggleTheme}
         />

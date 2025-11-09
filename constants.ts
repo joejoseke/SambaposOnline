@@ -1,8 +1,9 @@
 import type { MenuItem, Category, User } from './types';
 
 export const USERS: User[] = [
-  { id: 'u1', username: 'admin', pin: '1234', role: 'admin' },
-  { id: 'u2', username: 'service', pin: '0000', role: 'service' },
+  { id: 'u1', pin: '2020', role: 'waiter' },
+  { id: 'u2', pin: '2030', role: 'cashier' },
+  { id: 'u3', pin: '2040', role: 'director' },
 ];
 
 export const MENU_ITEMS: MenuItem[] = [
@@ -20,7 +21,7 @@ export const MENU_ITEMS: MenuItem[] = [
   { id: 'm12', name: 'Coke', price: 150, category: 'Drinks' },
   { id: 'm13', name: 'Sprite', price: 150, category: 'Drinks' },
   { id: 'm14', name: 'Iced Tea', price: 200, category: 'Drinks' },
-  { id: 'm15', name: 'Water', price: 100, category: 'Drinks' },
+  { id: 'm15', 'name': 'Water', price: 100, category: 'Drinks' },
   { id: 'm16', name: 'Chocolate Cake', price: 550, category: 'Desserts' },
   { id: 'm17', name: 'Cheesecake', price: 600, category: 'Desserts' },
 ];

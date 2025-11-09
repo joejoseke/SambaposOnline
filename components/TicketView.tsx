@@ -1,16 +1,17 @@
 import React, { useState, useCallback } from 'react';
-import type { Ticket } from '../types';
+import type { Ticket, UserRole } from '../types';
 import { getUpsellSuggestions } from '../services/geminiService';
 import { PlusIcon, MinusIcon, SparklesIcon, XMarkIcon } from './common/icons';
 
 interface TicketViewProps {
   ticket: Ticket;
+  userRole: UserRole;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onGoToPayment: () => void;
   onClose: () => void;
 }
 
-const TicketView: React.FC<TicketViewProps> = ({ ticket, onUpdateQuantity, onGoToPayment, onClose }) => {
+const TicketView: React.FC<TicketViewProps> = ({ ticket, userRole, onUpdateQuantity, onGoToPayment, onClose }) => {
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
 
@@ -31,6 +32,8 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onUpdateQuantity, onGoT
       setIsLoadingSuggestion(false);
     }
   }, [ticket]);
+
+  const canPay = userRole === 'cashier';
 
   return (
     <div className="flex flex-col h-full bg-surface-card dark:bg-surface-dark-card text-text-main dark:text-text-dark-main">
@@ -88,8 +91,9 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onUpdateQuantity, onGoT
       <div className="p-4 hidden md:block">
         <button
           onClick={onGoToPayment}
-          disabled={ticket.items.length === 0}
-          className="w-full bg-brand-primary text-white font-bold py-4 rounded-lg text-xl hover:bg-brand-secondary transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600"
+          disabled={ticket.items.length === 0 || !canPay}
+          title={!canPay ? "Payment processing requires cashier permissions" : ""}
+          className="w-full bg-brand-primary text-white font-bold py-4 rounded-lg text-xl hover:bg-brand-secondary transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 cursor-pointer disabled:cursor-not-allowed"
         >
           PAY
         </button>

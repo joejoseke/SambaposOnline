@@ -91,10 +91,11 @@ const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
           <KeypadButton onClick={handleLogin}><ArrowRightCircleIcon className="h-8 w-8 text-green-500"/></KeypadButton>
         </div>
         
-        <div className="flex justify-center mt-4">
-             <KeypadButton onClick={() => {}} className="aspect-auto w-24 py-3">
-                <PowerIcon className="h-8 w-8"/>
-             </KeypadButton>
+        <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+          <p>For testing:</p>
+          <p>Waiter PIN: 2020</p>
+          <p>Cashier PIN: 2030</p>
+          <p>Director PIN: 2040</p>
         </div>
       </div>
        <style>{`
