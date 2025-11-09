@@ -1,0 +1,5 @@
+{
+  "name": "React POS Pro",
+  "description": "A modern, feature-rich Point of Sale system designed for restaurants and retail, inspired by systems like SambaPOS. Manage tables, orders, and payments with an intuitive interface and AI-powered upselling suggestions.",
+  "requestFramePermissions": []
+}
