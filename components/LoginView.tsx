@@ -1,89 +1,113 @@
-import React, { useState } from 'react';
-import { Squares2X2Icon } from './common/icons';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { User } from '../types';
 import { USERS } from '../constants';
+import { XCircleIcon, ArrowRightCircleIcon, PowerIcon } from './common/icons';
 
 interface LoginViewProps {
   onLogin: (user: User) => void;
 }
 
-const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+const KeypadButton: React.FC<{ onClick: () => void; children: React.ReactNode; className?: string }> = ({ onClick, children, className = '' }) => (
+  <button
+    onClick={onClick}
+    className={`bg-surface-card dark:bg-surface-dark-card rounded-lg shadow-md hover:shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 p-4 text-center flex flex-col items-center justify-center aspect-square focus:outline-none focus:ring-2 focus:ring-brand-primary text-3xl font-semibold ${className}`}
+  >
+    {children}
+  </button>
+);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const foundUser = USERS.find(user => user.username === username && user.password === password);
+const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
+  const [shake, setShake] = useState(false);
+
+  const handleKeyPress = (key: string) => {
+    if (pin.length < 4) {
+      setPin(pin + key);
+      setError('');
+    }
+  };
+
+  const handleBackspace = () => {
+    setPin(pin.slice(0, -1));
+    setError('');
+  };
+
+  const triggerShake = () => {
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  };
+
+  const handleLogin = useCallback(() => {
+    if (pin.length === 0) return;
+    const foundUser = USERS.find(user => user.pin === pin);
 
     if (foundUser) {
       setError('');
       onLogin(foundUser);
     } else {
-      setError('Invalid username or password.');
+      setError('Invalid PIN');
+      setPin('');
+      triggerShake();
     }
-  };
+  }, [pin, onLogin]);
+  
+  // Allow submitting with Enter key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        handleLogin();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleLogin]);
+
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-surface-main dark:bg-surface-dark">
-      <div className="w-full max-w-md p-8 space-y-8 bg-surface-card dark:bg-surface-dark-card rounded-xl shadow-2xl">
-        <div className="flex flex-col items-center">
-          <div className="flex items-center gap-3 text-brand-primary dark:text-brand-light mb-4">
-            <Squares2X2Icon className="h-10 w-10" />
-            <h1 className="text-4xl font-bold">Neon Online POS</h1>
-          </div>
-          <p className="text-text-secondary dark:text-text-dark-secondary">Please sign in to continue</p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="username" className="sr-only">Username</label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-text-main dark:text-text-dark-main bg-surface-main dark:bg-surface-dark-card rounded-t-md focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm"
-                placeholder="Username"
-              />
-            </div>
-            <div>
-              <label htmlFor="password-input" className="sr-only">Password</label>
-              <input
-                id="password-input"
-                name="password"
+    <div className="flex items-center justify-center min-h-screen bg-surface-main dark:bg-surface-dark text-text-main dark:text-text-dark-main">
+      <div className="w-full max-w-xs p-4 space-y-6">
+        <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Neon Online POS</h1>
+            <input
                 type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-text-main dark:text-text-dark-main bg-surface-main dark:bg-surface-dark-card rounded-b-md focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
-          
-          {error && (
-            <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
-          )}
+                readOnly
+                value={pin}
+                placeholder="Enter PIN"
+                className={`w-full p-4 text-center text-3xl tracking-[1rem] bg-surface-main dark:bg-surface-dark border-2 rounded-lg focus:outline-none transition-all duration-300 ${shake ? 'animate-shake border-red-500' : 'border-brand-primary/50 focus:border-brand-primary'}`}
+                style={{ animation: shake ? 'shake 0.5s' : 'none' }}
+            />
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+        </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-light"
-            >
-              Sign in
-            </button>
-          </div>
-          <div className="text-center text-sm text-gray-500 space-y-1">
-            <p>Admin: <strong>admin</strong> / <strong>password</strong></p>
-            <p>Service: <strong>service</strong> / <strong>password</strong></p>
-          </div>
-        </form>
+        <div className="grid grid-cols-3 gap-3">
+          {[ '1', '2', '3', '4', '5', '6', '7', '8', '9'].map(key => (
+            <KeypadButton key={key} onClick={() => handleKeyPress(key)}>{key}</KeypadButton>
+          ))}
+          <KeypadButton onClick={handleBackspace}><XCircleIcon className="h-8 w-8 text-red-500"/></KeypadButton>
+          <KeypadButton onClick={() => handleKeyPress('0')}>0</KeypadButton>
+          <KeypadButton onClick={handleLogin}><ArrowRightCircleIcon className="h-8 w-8 text-green-500"/></KeypadButton>
+        </div>
+        
+        <div className="flex justify-center mt-4">
+             <KeypadButton onClick={() => {}} className="aspect-auto w-24 py-3">
+                <PowerIcon className="h-8 w-8"/>
+             </KeypadButton>
+        </div>
       </div>
+       <style>{`
+        @keyframes shake {
+          10%, 90% { transform: translate3d(-1px, 0, 0); }
+          20%, 80% { transform: translate3d(2px, 0, 0); }
+          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+          40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .animate-shake {
+          animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+      `}</style>
     </div>
   );
 };

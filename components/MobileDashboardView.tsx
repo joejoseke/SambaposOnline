@@ -1,6 +1,5 @@
-
 import React, { useMemo } from 'react';
-import type { Ticket, TicketItem } from '../types';
+import type { Ticket } from '../types';
 import { ArrowLeftIcon, ChartBarIcon, CurrencyDollarIcon, ShoppingCartIcon } from './common/icons';
 
 interface MobileDashboardViewProps {
@@ -92,9 +91,9 @@ const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* KPIs */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <KpiCard title="Total Revenue" value={`$${reportData.totalRevenue.toFixed(2)}`} icon={<CurrencyDollarIcon className="h-6 w-6 text-green-400" />} />
+                    <KpiCard title="Total Revenue" value={`Ksh ${reportData.totalRevenue.toFixed(2)}`} icon={<CurrencyDollarIcon className="h-6 w-6 text-green-400" />} />
                     <KpiCard title="Total Sales" value={reportData.totalSales.toString()} icon={<ShoppingCartIcon className="h-6 w-6 text-blue-400" />} />
-                    <KpiCard title="Average Sale" value={`$${reportData.averageSale.toFixed(2)}`} icon={<ChartBarIcon className="h-6 w-6 text-purple-400" />} />
+                    <KpiCard title="Average Sale" value={`Ksh ${reportData.averageSale.toFixed(2)}`} icon={<ChartBarIcon className="h-6 w-6 text-purple-400" />} />
                 </div>
 
                 {/* Sales By Category */}
@@ -104,7 +103,7 @@ const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, 
                             <div key={category}>
                                 <div className="flex justify-between items-center mb-1 text-sm">
                                     <span className="font-semibold">{category}</span>
-                                    <span>${value.toFixed(2)}</span>
+                                    <span>Ksh {value.toFixed(2)}</span>
                                 </div>
                                 <div className="w-full bg-gray-700 rounded-full h-2.5">
                                     <div className="bg-brand-light h-2.5 rounded-full" style={{ width: `${(value / maxCategoryValue) * 100}%` }}></div>
@@ -121,7 +120,7 @@ const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, 
                             <li key={item.name} className="flex justify-between items-center py-2">
                                 <div>
                                     <p className="font-semibold">{item.name}</p>
-                                    <p className="text-sm text-text-dark-secondary">${item.revenue.toFixed(2)} revenue</p>
+                                    <p className="text-sm text-text-dark-secondary">Ksh {item.revenue.toFixed(2)} revenue</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="font-bold text-lg">{item.quantity} sold</p>
@@ -140,7 +139,7 @@ const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({ paidTickets, 
                                     <p className="font-semibold">Ticket #{ticket.id.slice(-4)}</p>
                                     <p className="text-sm text-text-dark-secondary">{ticket.items.length} items</p>
                                 </div>
-                                <div className="font-bold text-lg text-green-400">${ticket.total.toFixed(2)}</div>
+                                <div className="font-bold text-lg text-green-400">Ksh {ticket.total.toFixed(2)}</div>
                             </li>
                         ))}
                     </ul>

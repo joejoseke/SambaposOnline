@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import type { Ticket } from '../types';
 import { getUpsellSuggestions } from '../services/geminiService';
@@ -52,14 +51,14 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onUpdateQuantity, onGoT
             <div key={menuItem.id} className="flex items-center">
               <div className="flex-1">
                 <p className="font-semibold">{menuItem.name}</p>
-                <p className="text-sm text-text-secondary dark:text-text-dark-secondary">${menuItem.price.toFixed(2)}</p>
+                <p className="text-sm text-text-secondary dark:text-text-dark-secondary">Ksh {menuItem.price.toFixed(2)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => onUpdateQuantity(menuItem.id, quantity - 1)} className="p-1 bg-gray-200 dark:bg-gray-600 rounded-full"><MinusIcon className="h-4 w-4" /></button>
                 <span className="w-6 text-center font-semibold">{quantity}</span>
                 <button onClick={() => onUpdateQuantity(menuItem.id, quantity + 1)} className="p-1 bg-gray-200 dark:bg-gray-600 rounded-full"><PlusIcon className="h-4 w-4" /></button>
               </div>
-              <div className="w-20 text-right font-semibold">${(menuItem.price * quantity).toFixed(2)}</div>
+              <div className="w-24 text-right font-semibold">Ksh {(menuItem.price * quantity).toFixed(2)}</div>
             </div>
           ))
         )}
@@ -80,13 +79,13 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, onUpdateQuantity, onGoT
 
       {/* Totals */}
       <div className="p-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
-        <div className="flex justify-between"><span>Subtotal</span><span>${ticket.subtotal.toFixed(2)}</span></div>
-        <div className="flex justify-between"><span>Tax (8%)</span><span>${ticket.tax.toFixed(2)}</span></div>
-        <div className="flex justify-between font-bold text-xl"><span>Total</span><span>${ticket.total.toFixed(2)}</span></div>
+        <div className="flex justify-between"><span>Subtotal</span><span>Ksh {ticket.subtotal.toFixed(2)}</span></div>
+        <div className="flex justify-between"><span>Tax (16%)</span><span>Ksh {ticket.tax.toFixed(2)}</span></div>
+        <div className="flex justify-between font-bold text-xl"><span>Total</span><span>Ksh {ticket.total.toFixed(2)}</span></div>
       </div>
       
-      {/* Action Button */}
-      <div className="p-4">
+      {/* Action Button - Hidden on mobile */}
+      <div className="p-4 hidden md:block">
         <button
           onClick={onGoToPayment}
           disabled={ticket.items.length === 0}

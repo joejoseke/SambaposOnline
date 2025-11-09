@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { MenuItem } from '../types';
 
@@ -12,8 +11,8 @@ const MenuItemCard: React.FC<{ item: MenuItem; onAdd: () => void }> = ({ item, o
       onClick={onAdd}
       className="bg-surface-card dark:bg-surface-dark-card rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 p-4 text-center flex flex-col justify-between aspect-square focus:outline-none focus:ring-2 focus:ring-brand-primary"
     >
-      <h3 className="font-bold text-md md:text-lg text-text-main dark:text-text-dark-main">{item.name}</h3>
-      <p className="text-text-secondary dark:text-text-dark-secondary text-lg">${item.price.toFixed(2)}</p>
+      <h3 className="font-bold text-sm sm:text-base text-text-main dark:text-text-dark-main">{item.name}</h3>
+      <p className="text-text-secondary dark:text-text-dark-secondary text-base font-semibold">Ksh {item.price.toFixed(2)}</p>
     </button>
 );
 

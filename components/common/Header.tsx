@@ -1,16 +1,16 @@
 import React from 'react';
-import type { ViewType, UserRole } from '../../types';
-import { HomeIcon, Squares2X2Icon, PowerIcon, DevicePhoneMobileIcon } from './icons';
+import type { UserRole } from '../../types';
+import { Squares2X2Icon, PowerIcon, DevicePhoneMobileIcon, SunIcon, MoonIcon } from './icons';
 
 interface HeaderProps {
-    currentView: ViewType;
     userRole: UserRole;
-    onHomeClick: () => void;
     onLogout: () => void;
     onMobileDashboardClick: () => void;
+    theme: 'light' | 'dark';
+    onToggleTheme: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentView, userRole, onHomeClick, onLogout, onMobileDashboardClick }) => {
+const Header: React.FC<HeaderProps> = ({ userRole, onLogout, onMobileDashboardClick, theme, onToggleTheme }) => {
   return (
     <header className="bg-brand-primary text-white shadow-lg flex items-center justify-between p-4">
       <div className="flex items-center gap-3">
@@ -18,12 +18,9 @@ const Header: React.FC<HeaderProps> = ({ currentView, userRole, onHomeClick, onL
         <h1 className="text-2xl font-bold">Neon Online POS</h1>
       </div>
       <div className="flex items-center gap-4">
-        {currentView !== 'TABLES' && (
-          <button onClick={onHomeClick} className="flex items-center gap-2 px-4 py-2 bg-brand-secondary rounded-lg hover:bg-brand-light transition-colors">
-              <HomeIcon className="h-5 w-5" />
-              <span className="font-semibold hidden sm:inline">Tables</span>
-          </button>
-        )}
+        <button onClick={onToggleTheme} className="p-2 rounded-full hover:bg-brand-light transition-colors">
+            {theme === 'light' ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+        </button>
         {userRole === 'admin' && (
          <button onClick={onMobileDashboardClick} className="flex items-center gap-2 px-4 py-2 bg-brand-secondary rounded-lg hover:bg-brand-light transition-colors">
             <DevicePhoneMobileIcon className="h-5 w-5" />

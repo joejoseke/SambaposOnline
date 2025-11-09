@@ -1,8 +1,5 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
-import type { Table, Ticket, MenuItem, ViewType, TicketItem, User } from './types';
-import { TABLES_DATA } from './constants';
-import TableView from './components/TableView';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import type { Ticket, MenuItem, ViewType, TicketItem, User } from './types';
 import OrderingView from './components/OrderingView';
 import PaymentView from './components/PaymentView';
 import Header from './components/common/Header';
@@ -11,10 +8,30 @@ import MobileDashboardView from './components/MobileDashboardView';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [tables, setTables] = useState<Table[]>(TABLES_DATA);
   const [tickets, setTickets] = useState<Map<string, Ticket>>(new Map());
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<ViewType>('TABLES');
+  const [currentView, setCurrentView] = useState<ViewType>('ORDERING');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      return savedTheme as 'light' | 'dark';
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
   const activeTicket = useMemo(() => {
     if (!activeTicketId) return null;
@@ -25,49 +42,35 @@ const App: React.FC = () => {
     return Array.from(tickets.values()).filter(t => t.status === 'paid');
   }, [tickets]);
 
+  const startNewOrder = useCallback(() => {
+    const newTicketId = `T-${Date.now()}`;
+    const newTicket: Ticket = {
+      id: newTicketId,
+      tableId: 'counter', // Use a generic ID since there are no tables
+      items: [],
+      total: 0,
+      subtotal: 0,
+      tax: 0,
+      status: 'open',
+    };
+    setTickets(prevTickets => new Map(prevTickets).set(newTicketId, newTicket));
+    setActiveTicketId(newTicketId);
+    setCurrentView('ORDERING');
+  }, []);
+
   const handleLogin = useCallback((user: User) => {
     setCurrentUser(user);
-  }, []);
+    startNewOrder();
+  }, [startNewOrder]);
 
   const handleLogout = useCallback(() => {
     setCurrentUser(null);
     setActiveTicketId(null);
-    setCurrentView('TABLES');
   }, []);
-
-  const handleSelectTable = useCallback((tableId: string) => {
-    // FIX: Removed explicit type on `ticket` parameter to rely on type inference, which resolves the issue of `existingTicket` being typed as `unknown`.
-    const existingTicket = Array.from(tickets.values()).find(
-      (ticket) => ticket.tableId === tableId && ticket.status === 'open'
-    );
-
-    if (existingTicket) {
-      setActiveTicketId(existingTicket.id);
-    } else {
-      const newTicketId = `T-${Date.now()}`;
-      const newTicket: Ticket = {
-        id: newTicketId,
-        tableId,
-        items: [],
-        total: 0,
-        subtotal: 0,
-        tax: 0,
-        status: 'open',
-      };
-      setTickets(prevTickets => new Map(prevTickets).set(newTicketId, newTicket));
-      setTables(prevTables =>
-        prevTables.map(table =>
-          table.id === tableId ? { ...table, status: 'occupied' } : table
-        )
-      );
-      setActiveTicketId(newTicketId);
-    }
-    setCurrentView('ORDERING');
-  }, [tickets]);
-
+  
   const updateTicketTotals = (items: TicketItem[]): { subtotal: number, tax: number, total: number } => {
     const subtotal = items.reduce((acc, item) => acc + item.menuItem.price * item.quantity, 0);
-    const tax = subtotal * 0.08; // 8% tax
+    const tax = subtotal * 0.16; // 16% VAT
     const total = subtotal + tax;
     return { subtotal, tax, total };
   };
@@ -76,7 +79,6 @@ const App: React.FC = () => {
     if (!activeTicketId) return;
 
     setTickets(prevTickets => {
-      // FIX: Explicitly type the new Map to ensure correct type inference for 'ticket'.
       const newTickets = new Map<string, Ticket>(prevTickets);
       const ticket = newTickets.get(activeTicketId);
       if (!ticket) return prevTickets;
@@ -105,7 +107,6 @@ const App: React.FC = () => {
     if (!activeTicketId) return;
 
     setTickets(prevTickets => {
-      // FIX: Explicitly type the new Map to ensure correct type inference for 'ticket'.
       const newTickets = new Map<string, Ticket>(prevTickets);
       const ticket = newTickets.get(activeTicketId);
       if (!ticket) return prevTickets;
@@ -138,7 +139,6 @@ const App: React.FC = () => {
     if (!activeTicket) return;
 
     setTickets(prevTickets => {
-      // FIX: Explicitly type the new Map to ensure correct type inference for 'ticket'.
       const newTickets = new Map<string, Ticket>(prevTickets);
       const ticket = newTickets.get(activeTicket.id);
       if (ticket) {
@@ -148,20 +148,18 @@ const App: React.FC = () => {
       return newTickets;
     });
 
-    setTables(prevTables =>
-      prevTables.map(table =>
-        table.id === activeTicket.tableId ? { ...table, status: 'available' } : table
-      )
-    );
+    startNewOrder();
+  }, [activeTicket, startNewOrder]);
 
-    setActiveTicketId(null);
-    setCurrentView('TABLES');
-  }, [activeTicket]);
-
-  const handleCloseOrderView = useCallback(() => {
-    setActiveTicketId(null);
-    setCurrentView('TABLES');
-  }, []);
+  const handleCancelOrder = useCallback(() => {
+    if (activeTicket && activeTicket.items.length > 0) {
+        if (window.confirm('Are you sure you want to cancel this order and start a new one?')) {
+            startNewOrder();
+        }
+    } else {
+        startNewOrder();
+    }
+  }, [activeTicket, startNewOrder]);
   
   const handleGoToMobileDashboard = useCallback(() => {
     if (currentUser?.role === 'admin') {
@@ -169,14 +167,16 @@ const App: React.FC = () => {
     }
   }, [currentUser]);
 
+  const handleBackToPOS = useCallback(() => {
+    setCurrentView('ORDERING');
+  }, []);
+
   if (!currentUser) {
     return <LoginView onLogin={handleLogin} />;
   }
 
   const renderContent = () => {
     switch(currentView) {
-      case 'TABLES':
-        return <TableView tables={tables} onSelectTable={handleSelectTable} />;
       case 'ORDERING':
         return activeTicket && (
           <OrderingView
@@ -184,7 +184,7 @@ const App: React.FC = () => {
             onAddItem={handleAddItemToTicket}
             onUpdateQuantity={handleUpdateItemQuantity}
             onGoToPayment={handleGoToPayment}
-            onClose={handleCloseOrderView}
+            onClose={handleCancelOrder}
           />
         );
       case 'PAYMENT':
@@ -196,9 +196,9 @@ const App: React.FC = () => {
           />
         );
       case 'MOBILE_DASHBOARD':
-        return <MobileDashboardView paidTickets={paidTickets} onBackToPOS={handleCloseOrderView} />;
+        return <MobileDashboardView paidTickets={paidTickets} onBackToPOS={handleBackToPOS} />;
       default:
-        return <TableView tables={tables} onSelectTable={handleSelectTable} />;
+        return null; // Should not happen as a ticket is created on login
     }
   }
 
@@ -206,11 +206,11 @@ const App: React.FC = () => {
     <div className="h-screen w-screen flex flex-col font-sans bg-surface-main dark:bg-surface-dark text-text-main dark:text-text-dark-main overflow-hidden">
       {currentView !== 'MOBILE_DASHBOARD' && (
         <Header 
-          currentView={currentView} 
           userRole={currentUser.role}
-          onHomeClick={handleCloseOrderView} 
           onLogout={handleLogout} 
           onMobileDashboardClick={handleGoToMobileDashboard}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       )}
       <main className="flex-1 overflow-hidden">

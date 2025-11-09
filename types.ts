@@ -1,4 +1,3 @@
-
 export interface MenuItem {
   id: string;
   name: string;
@@ -21,21 +20,22 @@ export interface Ticket {
   status: 'open' | 'paid' | 'void';
 }
 
+// FIX: Add missing Table interface for TableView.tsx
 export interface Table {
   id: string;
   name: string;
   status: 'available' | 'occupied';
 }
 
-export type ViewType = 'TABLES' | 'ORDERING' | 'PAYMENT' | 'MOBILE_DASHBOARD';
+export type ViewType = 'ORDERING' | 'PAYMENT' | 'MOBILE_DASHBOARD';
 
 export type Category = string;
 
 export type UserRole = 'admin' | 'service';
 
 export interface User {
-  id: string;
+  id:string;
   username: string;
   role: UserRole;
-  password?: string; // For simulation purposes
+  pin: string;
 }

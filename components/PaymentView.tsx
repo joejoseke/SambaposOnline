@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import type { Ticket } from '../types';
 import { ArrowLeftIcon, CreditCardIcon, BanknotesIcon } from './common/icons';
@@ -24,7 +23,7 @@ const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onB
 
         <div className="p-8 text-center">
           <p className="text-lg text-text-secondary dark:text-text-dark-secondary">Total Amount Due</p>
-          <p className="text-6xl font-bold my-4 text-brand-primary dark:text-brand-light">${ticket.total.toFixed(2)}</p>
+          <p className="text-6xl font-bold my-4 text-brand-primary dark:text-brand-light">Ksh {ticket.total.toFixed(2)}</p>
         </div>
 
         <div className="px-8 pb-8">
