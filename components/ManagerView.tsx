@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import type { Ticket, StockItem } from '../types';
-import { PowerIcon, ChartBarIcon, CurrencyDollarIcon, ShoppingCartIcon } from './common/icons';
+import { PowerIcon, ChartBarIcon, CurrencyDollarIcon, ShoppingCartIcon, EnvelopeIcon } from './common/icons';
+import { LOW_STOCK_THRESHOLD } from '../constants';
 
 interface ManagerViewProps {
     paidTickets: Ticket[];
@@ -26,6 +27,12 @@ const ManagerView: React.FC<ManagerViewProps> = ({ paidTickets, stockItems, onLo
         const averageSale = totalSales > 0 ? totalRevenue / totalSales : 0;
         return { totalRevenue, totalSales, averageSale };
     }, [paidTickets]);
+
+    const handleNotifySupplier = (item: StockItem) => {
+        const subject = `Urgent: Low Stock Alert for ${item.name}`;
+        const body = `Hello Procurement Team,\n\nThis is an automated notification to inform you that the stock for the item "${item.name}" is running low.\n\nCurrent Quantity: ${item.quantity} ${item.unit}\nThreshold: ${LOW_STOCK_THRESHOLD} ${item.unit}\n\nPlease initiate the reordering process at your earliest convenience.\n\nThank you,\nNeon POS System`;
+        window.location.href = `mailto:procurement@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    };
 
     return (
         <div className="h-full w-full bg-surface-dark text-text-dark-main flex flex-col">
@@ -53,15 +60,42 @@ const ManagerView: React.FC<ManagerViewProps> = ({ paidTickets, stockItems, onLo
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Item Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Current Quantity</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-700">
-                                {stockItems.map(item => (
-                                    <tr key={item.id} className={item.quantity < 10 ? 'bg-red-900/50' : ''}>
+                                {stockItems.map(item => {
+                                    const isLowStock = item.quantity < LOW_STOCK_THRESHOLD;
+                                    return (
+                                    <tr key={item.id} className={isLowStock ? 'bg-red-900/50' : ''}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{item.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{item.quantity} {item.unit}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {isLowStock ? (
+                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-200 text-red-800">
+                                                    Low Stock
+                                                </span>
+                                            ) : (
+                                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-200 text-green-800">
+                                                    OK
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {isLowStock && (
+                                                <button
+                                                    onClick={() => handleNotifySupplier(item)}
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-yellow-600 text-white text-xs font-semibold rounded-lg hover:bg-yellow-700 transition-colors"
+                                                    title="Notify Procurement"
+                                                >
+                                                    <EnvelopeIcon className="h-4 w-4" />
+                                                    Notify
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
-                                ))}
+                                )})}
                             </tbody>
                         </table>
                     </div>

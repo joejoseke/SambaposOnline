@@ -134,3 +134,9 @@ export const UserGroupIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) =>
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.125-2.002v-5.253a9.349 9.349 0 00-2.326-6.095c-.842-.842-1.956-1.35-3.125-1.35-1.291 0-2.45.6-3.25 1.5a9.349 9.349 0 00-2.326 6.095v5.253a9.337 9.337 0 004.125 2.002zM8.25 19.128a9.38 9.38 0 01-2.625.372A9.337 9.337 0 011.5 17.502v-5.253a9.349 9.349 0 012.326-6.095c.842-.842 1.956-1.35 3.125-1.35s2.45.6 3.25 1.5a9.349 9.349 0 012.326 6.095v5.253a9.337 9.337 0 01-4.125 2.002z" />
     </svg>
 );
+
+export const EnvelopeIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+  </svg>
+);

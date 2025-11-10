@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { StockItem } from '../types';
-import { PowerIcon, PlusIcon } from './common/icons';
+import { PowerIcon, PlusIcon, EnvelopeIcon } from './common/icons';
+import { LOW_STOCK_THRESHOLD } from '../constants';
 
 interface ProcurementViewProps {
     stockItems: StockItem[];
@@ -14,6 +15,11 @@ const ProcurementView: React.FC<ProcurementViewProps> = ({ stockItems, onUpdateS
     const [newItemName, setNewItemName] = useState('');
     const [newItemQuantity, setNewItemQuantity] = useState('');
     const [newItemUnit, setNewItemUnit] = useState<'pcs' | 'g' | 'ml'>('pcs');
+
+    const lowStockItems = useMemo(() => 
+        stockItems.filter(item => item.quantity < LOW_STOCK_THRESHOLD)
+        .sort((a,b) => a.quantity - b.quantity),
+    [stockItems]);
 
     const handleQuantityChange = (id: string, value: string) => {
         setUpdatedQuantities(prev => ({ ...prev, [id]: value }));
@@ -46,6 +52,12 @@ const ProcurementView: React.FC<ProcurementViewProps> = ({ stockItems, onUpdateS
         }
     };
 
+    const handleNotifySupplier = (item: StockItem) => {
+        const subject = `Urgent: Reorder Request for ${item.name}`;
+        const body = `Hello Supplier,\n\nThis is a reorder request for the following item:\n\nItem: ${item.name}\nCurrent Quantity: ${item.quantity} ${item.unit}\n\nPlease process a new shipment. Let us know the estimated delivery date.\n\nThank you,\nProcurement Team`;
+        window.location.href = `mailto:supplier@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    };
+
     return (
         <div className="h-full w-full bg-surface-dark text-text-dark-main flex flex-col">
             <header className="flex-shrink-0 bg-surface-dark-card/50 backdrop-blur-sm p-4 flex items-center justify-between sticky top-0 z-10">
@@ -56,6 +68,42 @@ const ProcurementView: React.FC<ProcurementViewProps> = ({ stockItems, onUpdateS
                 </button>
             </header>
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {/* Low Stock Alerts */}
+                {lowStockItems.length > 0 && (
+                    <div className="bg-red-900/40 border border-red-700 rounded-xl">
+                        <h2 className="text-lg font-bold text-red-200 p-4 border-b border-red-700">Low Stock Alerts ({lowStockItems.length})</h2>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full">
+                                <thead className="bg-red-900/50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-red-200 uppercase tracking-wider">Item Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-red-200 uppercase tracking-wider">Current Qty</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-red-200 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {lowStockItems.map(item => (
+                                        <tr key={item.id} className="border-t border-red-800">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{item.name}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-red-300">{item.quantity} {item.unit}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <button
+                                                    onClick={() => handleNotifySupplier(item)}
+                                                    className="flex items-center gap-2 px-3 py-1.5 bg-yellow-600 text-white text-xs font-semibold rounded-lg hover:bg-yellow-700 transition-colors"
+                                                    title="Email supplier for reorder"
+                                                >
+                                                    <EnvelopeIcon className="h-4 w-4" />
+                                                    Notify Supplier
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
                 {/* Add New Item Form */}
                 <div className="bg-surface-dark-card rounded-xl p-4">
                     <h2 className="text-lg font-bold text-text-dark-main mb-4">Add New Stock Item</h2>
@@ -97,7 +145,7 @@ const ProcurementView: React.FC<ProcurementViewProps> = ({ stockItems, onUpdateS
                             </thead>
                             <tbody className="divide-y divide-gray-700">
                                 {stockItems.map(item => (
-                                    <tr key={item.id}>
+                                    <tr key={item.id} className={item.quantity < LOW_STOCK_THRESHOLD ? 'bg-red-900/30' : ''}>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{item.name}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{item.quantity} {item.unit}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">

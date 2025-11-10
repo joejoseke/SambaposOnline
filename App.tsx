@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Ticket, MenuItem, ViewType, TicketItem, User, StockItem, UserRole } from './types';
 import OrderingView from './components/OrderingView';
@@ -39,7 +40,8 @@ const App: React.FC = () => {
   }, [activeTicketId, tickets]);
 
   const paidTickets = useMemo(() => {
-    return Array.from(tickets.values()).filter(t => t.status === 'paid');
+    // FIX: Changed `Array.from(tickets.values())` to `[...tickets.values()]` to resolve a TypeScript type inference issue where `t` was inferred as `unknown`. The spread syntax correctly infers the type of `t` as `Ticket`.
+    return [...tickets.values()].filter(t => t.status === 'paid');
   }, [tickets]);
   
   const startNewOrder = useCallback(() => {
