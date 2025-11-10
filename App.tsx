@@ -5,10 +5,12 @@ import OrderingView from './components/OrderingView';
 import PaymentView from './components/PaymentView';
 import Header from './components/common/Header';
 import LoginView from './components/LoginView';
-import MobileDashboardView from './components/MobileDashboardView';
+import DirectorDashboardView from './components/DirectorDashboardView';
 import ProcurementView from './components/ProcurementView';
 import AccountantView from './components/AccountantView';
 import ManagerView from './components/ManagerView';
+import ReceiptView from './components/ReceiptView';
+import CashierDashboardView from './components/CashierDashboardView';
 import { MENU_ITEMS, STOCK_ITEMS } from './constants';
 
 const App: React.FC = () => {
@@ -17,6 +19,7 @@ const App: React.FC = () => {
   const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<ViewType>('ORDERING');
   const [stockItems, setStockItems] = useState<StockItem[]>(STOCK_ITEMS);
+  const [lastPaidTicket, setLastPaidTicket] = useState<Ticket | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) return savedTheme as 'light' | 'dark';
@@ -41,18 +44,23 @@ const App: React.FC = () => {
 
   const paidTickets = useMemo(() => {
     // FIX: Changed `Array.from(tickets.values())` to `[...tickets.values()]` to resolve a TypeScript type inference issue where `t` was inferred as `unknown`. The spread syntax correctly infers the type of `t` as `Ticket`.
-    return [...tickets.values()].filter(t => t.status === 'paid');
+    return [...tickets.values()].filter(t => t.status === 'paid').sort((a, b) => new Date(b.paidAt!).getTime() - new Date(a.paidAt!).getTime());
   }, [tickets]);
   
   const startNewOrder = useCallback(() => {
+    if (!currentUser) {
+      setCurrentUser(null);
+      return;
+    }
     const newTicketId = `T-${Date.now()}`;
     const newTicket: Ticket = {
-      id: newTicketId, tableId: 'counter', items: [], total: 0, subtotal: 0, tax: 0, status: 'open',
+      id: newTicketId, tableId: 'counter', items: [], total: 0, subtotal: 0, tax: 0, status: 'open', userId: currentUser.id,
     };
     setTickets(prevTickets => new Map(prevTickets).set(newTicketId, newTicket));
     setActiveTicketId(newTicketId);
+    setLastPaidTicket(null);
     setCurrentView('ORDERING');
-  }, []);
+  }, [currentUser]);
 
   const handleLogin = useCallback((user: User) => {
     setCurrentUser(user);
@@ -69,11 +77,22 @@ const App: React.FC = () => {
       case 'procurement':
         setCurrentView('PROCUREMENT_DASHBOARD');
         break;
+      case 'cashier':
+        setCurrentView('CASHIER_DASHBOARD');
+        break;
       default:
-        startNewOrder();
+        // Create the first ticket for this session directly to associate the user
+        const newTicketId = `T-${Date.now()}`;
+        const newTicket: Ticket = {
+          id: newTicketId, tableId: 'counter', items: [], total: 0, subtotal: 0, tax: 0, status: 'open', userId: user.id
+        };
+        setTickets(prevTickets => new Map(prevTickets).set(newTicketId, newTicket));
+        setActiveTicketId(newTicketId);
+        setLastPaidTicket(null);
+        setCurrentView('ORDERING');
         break;
     }
-  }, [startNewOrder]);
+  }, []);
 
   const handleLogout = useCallback(() => {
     setCurrentUser(null);
@@ -193,29 +212,38 @@ const App: React.FC = () => {
   const handleProcessPayment = useCallback((paymentMethod: 'cash' | 'card') => {
     if (!activeTicket) return;
 
+    let paidTicket: Ticket | null = null;
     setTickets(prevTickets => {
       const newTickets = new Map<string, Ticket>(prevTickets);
       const ticket = newTickets.get(activeTicket.id);
       if (ticket) {
         const updatedTicket = { ...ticket, status: 'paid' as const, paymentMethod, paidAt: new Date().toISOString() };
+        paidTicket = updatedTicket;
         newTickets.set(activeTicket.id, updatedTicket);
       }
       return newTickets;
     });
 
-    startNewOrder();
-  }, [activeTicket, startNewOrder]);
+    if (paidTicket) {
+      setLastPaidTicket(paidTicket);
+    }
+    setActiveTicketId(null);
+    setCurrentView('RECEIPT');
+  }, [activeTicket]);
 
   const handleCancelOrder = useCallback(() => {
     if (activeTicket && activeTicket.items.length > 0) {
         if (window.confirm('Are you sure you want to cancel this order? Items will be returned to stock.')) {
             adjustStock(activeTicket.items, 1);
-            startNewOrder();
         }
-    } else {
-        startNewOrder();
     }
-  }, [activeTicket, startNewOrder]);
+    if (currentUser?.role === 'cashier') {
+      setCurrentView('CASHIER_DASHBOARD');
+      setActiveTicketId(null);
+    } else {
+      startNewOrder();
+    }
+  }, [activeTicket, startNewOrder, currentUser]);
   
   const handleUpdateStock = (stockItemId: string, newQuantity: number) => {
     setStockItems(prevStock =>
@@ -237,7 +265,7 @@ const App: React.FC = () => {
     return <LoginView onLogin={handleLogin} />;
   }
   
-  const isDashboardView = ['DIRECTOR_DASHBOARD', 'MANAGER_DASHBOARD', 'ACCOUNTANT_DASHBOARD', 'PROCUREMENT_DASHBOARD'].includes(currentView);
+  const isDashboardView = ['DIRECTOR_DASHBOARD', 'MANAGER_DASHBOARD', 'ACCOUNTANT_DASHBOARD', 'PROCUREMENT_DASHBOARD', 'CASHIER_DASHBOARD'].includes(currentView);
 
   return (
     <div className="h-screen w-screen flex flex-col font-sans bg-surface-main dark:bg-surface-dark text-text-main dark:text-text-dark-main overflow-hidden">
@@ -273,14 +301,23 @@ const App: React.FC = () => {
                   onBack={() => setCurrentView('ORDERING')}
                 />
               );
+            case 'RECEIPT':
+              return lastPaidTicket && (
+                <ReceiptView 
+                  ticket={lastPaidTicket}
+                  onDone={currentUser.role === 'cashier' ? () => setCurrentView('CASHIER_DASHBOARD') : startNewOrder}
+                />
+              );
             case 'DIRECTOR_DASHBOARD':
-              return <MobileDashboardView paidTickets={paidTickets} onLogout={handleLogout} />;
+              return <DirectorDashboardView paidTickets={paidTickets} onLogout={handleLogout} />;
             case 'MANAGER_DASHBOARD':
               return <ManagerView paidTickets={paidTickets} stockItems={stockItems} onLogout={handleLogout} />;
             case 'ACCOUNTANT_DASHBOARD':
               return <AccountantView paidTickets={paidTickets} onLogout={handleLogout} />;
             case 'PROCUREMENT_DASHBOARD':
               return <ProcurementView stockItems={stockItems} onUpdateStock={handleUpdateStock} onAddStockItem={handleAddStockItem} onLogout={handleLogout} />;
+            case 'CASHIER_DASHBOARD':
+              return <CashierDashboardView paidTickets={paidTickets} onLogout={handleLogout} onStartNewOrder={startNewOrder} />;
             default:
               return null;
           }

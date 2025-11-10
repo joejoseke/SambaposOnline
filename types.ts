@@ -33,6 +33,7 @@ export interface Ticket {
   status: 'open' | 'paid' | 'void';
   paymentMethod?: 'cash' | 'card';
   paidAt?: string;
+  userId?: string;
 }
 
 export interface Table {
@@ -43,11 +44,13 @@ export interface Table {
 
 export type ViewType = 
   | 'ORDERING' 
-  | 'PAYMENT' 
+  | 'PAYMENT'
+  | 'RECEIPT'
   | 'DIRECTOR_DASHBOARD'
   | 'PROCUREMENT_DASHBOARD'
   | 'ACCOUNTANT_DASHBOARD'
-  | 'MANAGER_DASHBOARD';
+  | 'MANAGER_DASHBOARD'
+  | 'CASHIER_DASHBOARD';
 
 export type Category = string;
 

@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import type { Ticket, UserRole } from '../types';
-import { getUpsellSuggestions } from '../services/geminiService';
-import { PlusIcon, MinusIcon, SparklesIcon, XMarkIcon } from './common/icons';
+import { PlusIcon, MinusIcon, XMarkIcon, PrinterIcon } from './common/icons';
+import { printTicket } from '../utils/printTicket';
 
 interface TicketViewProps {
   ticket: Ticket;
@@ -12,28 +12,11 @@ interface TicketViewProps {
 }
 
 const TicketView: React.FC<TicketViewProps> = ({ ticket, userRole, onUpdateQuantity, onGoToPayment, onClose }) => {
-  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
-  const [isLoadingSuggestion, setIsLoadingSuggestion] = useState(false);
-
-  const handleAiSuggest = useCallback(async () => {
-    if (!ticket || ticket.items.length === 0) {
-      setAiSuggestion("Add items to the order to get suggestions.");
-      return;
-    }
-    setIsLoadingSuggestion(true);
-    setAiSuggestion(null);
-    try {
-      const suggestion = await getUpsellSuggestions(ticket.items);
-      setAiSuggestion(suggestion);
-    } catch (error) {
-      console.error("Error getting AI suggestion:", error);
-      setAiSuggestion("Sorry, I couldn't get a suggestion right now.");
-    } finally {
-      setIsLoadingSuggestion(false);
-    }
-  }, [ticket]);
-
   const canPay = userRole === 'cashier';
+
+  const handlePrintBill = () => {
+    printTicket(ticket, false);
+  };
 
   return (
     <div className="flex flex-col h-full bg-surface-card dark:bg-surface-dark-card text-text-main dark:text-text-dark-main">
@@ -67,19 +50,6 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, userRole, onUpdateQuant
         )}
       </div>
 
-      {/* AI Suggestion Box */}
-      <div className="p-4 border-t border-b border-gray-200 dark:border-gray-700">
-        <button onClick={handleAiSuggest} disabled={isLoadingSuggestion} className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-purple-600 rounded-md hover:bg-purple-700 disabled:bg-purple-400 transition-colors">
-          <SparklesIcon className="h-5 w-5" />
-          {isLoadingSuggestion ? 'Thinking...' : 'AI Upsell Suggestion'}
-        </button>
-        {aiSuggestion && (
-          <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/50 border border-purple-200 dark:border-purple-800 rounded-md text-sm text-purple-800 dark:text-purple-200">
-            {aiSuggestion}
-          </div>
-        )}
-      </div>
-
       {/* Totals */}
       <div className="p-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
         <div className="flex justify-between"><span>Subtotal</span><span>Ksh {ticket.subtotal.toFixed(2)}</span></div>
@@ -87,8 +57,16 @@ const TicketView: React.FC<TicketViewProps> = ({ ticket, userRole, onUpdateQuant
         <div className="flex justify-between font-bold text-xl"><span>Total</span><span>Ksh {ticket.total.toFixed(2)}</span></div>
       </div>
       
-      {/* Action Button - Hidden on mobile */}
-      <div className="p-4 hidden md:block">
+      {/* Action Buttons - Hidden on mobile */}
+      <div className="p-4 hidden md:flex md:flex-col space-y-2">
+        <button
+          onClick={handlePrintBill}
+          disabled={ticket.items.length === 0}
+          className="w-full flex items-center justify-center gap-2 bg-gray-200 dark:bg-gray-600 text-text-main dark:text-text-dark-main font-bold py-3 rounded-lg text-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors disabled:opacity-50"
+        >
+          <PrinterIcon className="h-5 w-5" />
+          Print Bill
+        </button>
         <button
           onClick={onGoToPayment}
           disabled={ticket.items.length === 0 || !canPay}
