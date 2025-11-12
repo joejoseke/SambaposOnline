@@ -1,6 +1,20 @@
 import type { Ticket } from '../types';
 
 export function printTicket(ticket: Ticket, isReceipt: boolean): void {
+  
+  const qrCodeHtml = (isReceipt && ticket.qrCodeData) 
+    ? `
+      <div class="qr-code">
+        <p style="font-size: 11px; margin-bottom: 5px;">Scan to verify with KRA</p>
+        <img 
+          src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(ticket.qrCodeData)}" 
+          alt="KRA QR Code" 
+        />
+        ${ticket.etimsInvoiceNumber ? `<p style="font-size: 10px; margin-top: 5px; font-family: monospace;">Inv No: ${ticket.etimsInvoiceNumber}</p>` : ''}
+      </div>
+    `
+    : '';
+
   const content = `
     <html>
       <head>
@@ -28,6 +42,7 @@ export function printTicket(ticket: Ticket, isReceipt: boolean): void {
           .totals td:first-child { font-weight: normal; }
           .totals td { font-weight: bold; }
           .footer { text-align: center; margin-top: 20px; font-size: 12px; border-top: 1px dashed #000; padding-top: 10px;}
+          .qr-code { display: flex; flex-direction: column; align-items: center; margin: 15px 0; border-top: 1px dashed #000; padding-top: 15px; }
         </style>
       </head>
       <body>
@@ -79,6 +94,7 @@ export function printTicket(ticket: Ticket, isReceipt: boolean): void {
             <p><strong>Payment Method:</strong> ${ticket.paymentMethod?.toUpperCase()}</p>
             <p><strong>Status:</strong> PAID</p>
           </div>
+          ${qrCodeHtml}
           <div class="footer">
             <p>Thank you for your visit!</p>
           </div>
@@ -92,8 +108,11 @@ export function printTicket(ticket: Ticket, isReceipt: boolean): void {
     printWindow.document.write(content);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    // Use onload to ensure images (like the QR code) are loaded before printing
+    printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+    };
   } else {
     alert('Please allow popups for this website to print the ticket.');
   }

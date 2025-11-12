@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Ticket, MenuItem, ViewType, TicketItem, User, StockItem, UserRole } from './types';
 import OrderingView from './components/OrderingView';
@@ -12,6 +11,7 @@ import ManagerView from './components/ManagerView';
 import ReceiptView from './components/ReceiptView';
 import CashierDashboardView from './components/CashierDashboardView';
 import { MENU_ITEMS, STOCK_ITEMS } from './constants';
+import { etimsService, EtimsApiException } from './services/etimsService';
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('ORDERING');
   const [stockItems, setStockItems] = useState<StockItem[]>(STOCK_ITEMS);
   const [lastPaidTicket, setLastPaidTicket] = useState<Ticket | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) return savedTheme as 'light' | 'dark';
@@ -43,7 +44,6 @@ const App: React.FC = () => {
   }, [activeTicketId, tickets]);
 
   const paidTickets = useMemo(() => {
-    // FIX: Changed `Array.from(tickets.values())` to `[...tickets.values()]` to resolve a TypeScript type inference issue where `t` was inferred as `unknown`. The spread syntax correctly infers the type of `t` as `Ticket`.
     return [...tickets.values()].filter(t => t.status === 'paid').sort((a, b) => new Date(b.paidAt!).getTime() - new Date(a.paidAt!).getTime());
   }, [tickets]);
   
@@ -81,7 +81,6 @@ const App: React.FC = () => {
         setCurrentView('CASHIER_DASHBOARD');
         break;
       default:
-        // Create the first ticket for this session directly to associate the user
         const newTicketId = `T-${Date.now()}`;
         const newTicket: Ticket = {
           id: newTicketId, tableId: 'counter', items: [], total: 0, subtotal: 0, tax: 0, status: 'open', userId: user.id
@@ -209,27 +208,47 @@ const App: React.FC = () => {
     else alert("Cannot proceed to payment with an empty ticket.");
   }, [activeTicket, currentUser]);
 
-  const handleProcessPayment = useCallback((paymentMethod: 'cash' | 'card') => {
-    if (!activeTicket) return;
+  const handleProcessPayment = useCallback(async (paymentMethod: 'cash' | 'card') => {
+    if (!activeTicket || isProcessingPayment) return;
 
-    let paidTicket: Ticket | null = null;
-    setTickets(prevTickets => {
-      const newTickets = new Map<string, Ticket>(prevTickets);
-      const ticket = newTickets.get(activeTicket.id);
-      if (ticket) {
-        const updatedTicket = { ...ticket, status: 'paid' as const, paymentMethod, paidAt: new Date().toISOString() };
-        paidTicket = updatedTicket;
-        newTickets.set(activeTicket.id, updatedTicket);
-      }
-      return newTickets;
-    });
+    setIsProcessingPayment(true);
+    try {
+        const validationData = await etimsService.sendSalesTransaction(activeTicket);
 
-    if (paidTicket) {
-      setLastPaidTicket(paidTicket);
+        let paidTicket: Ticket | null = null;
+        setTickets(prevTickets => {
+            const newTickets = new Map<string, Ticket>(prevTickets);
+            const ticket = newTickets.get(activeTicket.id);
+            if (ticket) {
+                const updatedTicket: Ticket = { 
+                    ...ticket, 
+                    status: 'paid' as const, 
+                    paymentMethod, 
+                    paidAt: new Date().toISOString(),
+                    ...validationData 
+                };
+                paidTicket = updatedTicket;
+                newTickets.set(activeTicket.id, updatedTicket);
+            }
+            return newTickets;
+        });
+
+        if (paidTicket) {
+            setLastPaidTicket(paidTicket);
+        }
+        setActiveTicketId(null);
+        setCurrentView('RECEIPT');
+    } catch (error) {
+        console.error("Payment processing failed:", error);
+        if (error instanceof EtimsApiException) {
+            alert(`ETIMS Error (${error.code}): ${error.message}`);
+        } else {
+            alert((error as Error).message || 'An unexpected error occurred during payment processing.');
+        }
+    } finally {
+        setIsProcessingPayment(false);
     }
-    setActiveTicketId(null);
-    setCurrentView('RECEIPT');
-  }, [activeTicket]);
+  }, [activeTicket, isProcessingPayment]);
 
   const handleCancelOrder = useCallback(() => {
     if (activeTicket && activeTicket.items.length > 0) {
@@ -299,6 +318,7 @@ const App: React.FC = () => {
                   ticket={activeTicket}
                   onProcessPayment={handleProcessPayment}
                   onBack={() => setCurrentView('ORDERING')}
+                  isProcessing={isProcessingPayment}
                 />
               );
             case 'RECEIPT':

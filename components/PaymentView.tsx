@@ -6,9 +6,10 @@ interface PaymentViewProps {
   ticket: Ticket;
   onProcessPayment: (paymentMethod: 'cash' | 'card') => void;
   onBack: () => void;
+  isProcessing: boolean;
 }
 
-const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onBack }) => {
+const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onBack, isProcessing }) => {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | null>(null);
 
   const handleConfirm = () => {
@@ -21,7 +22,7 @@ const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onB
     <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
       <div className="bg-surface-card dark:bg-surface-dark-card rounded-xl shadow-2xl w-full max-w-md m-4 transform transition-all">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700 relative">
-          <button onClick={onBack} className="absolute top-4 left-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+          <button onClick={onBack} disabled={isProcessing} className="absolute top-4 left-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
             <ArrowLeftIcon className="h-6 w-6" />
           </button>
           <h2 className="text-3xl font-bold text-center">Payment</h2>
@@ -37,14 +38,16 @@ const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onB
             <div className="grid grid-cols-2 gap-4">
                 <button 
                     onClick={() => setPaymentMethod('cash')}
-                    className={`p-6 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-colors ${paymentMethod === 'cash' ? 'bg-brand-light text-white border-brand-primary' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent'}`}
+                    disabled={isProcessing}
+                    className={`p-6 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-colors ${paymentMethod === 'cash' ? 'bg-brand-light text-white border-brand-primary' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent'} disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                     <BanknotesIcon className="h-10 w-10"/>
                     <span className="font-semibold">Cash</span>
                 </button>
                 <button
                     onClick={() => setPaymentMethod('card')}
-                    className={`p-6 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-colors ${paymentMethod === 'card' ? 'bg-brand-light text-white border-brand-primary' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent'}`}
+                    disabled={isProcessing}
+                    className={`p-6 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-colors ${paymentMethod === 'card' ? 'bg-brand-light text-white border-brand-primary' : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border-transparent'} disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                     <CreditCardIcon className="h-10 w-10"/>
                     <span className="font-semibold">Card</span>
@@ -55,10 +58,18 @@ const PaymentView: React.FC<PaymentViewProps> = ({ ticket, onProcessPayment, onB
         <div className="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-b-xl">
           <button
             onClick={handleConfirm}
-            disabled={!paymentMethod}
-            className="w-full bg-green-600 text-white font-bold py-4 rounded-lg text-xl hover:bg-green-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600"
+            disabled={!paymentMethod || isProcessing}
+            className="w-full bg-green-600 text-white font-bold py-4 rounded-lg text-xl hover:bg-green-700 transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-600 flex justify-center items-center"
           >
-            Confirm Payment
+            {isProcessing ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </>
+            ) : 'Confirm Payment'}
           </button>
         </div>
       </div>

@@ -34,6 +34,10 @@ export interface Ticket {
   paymentMethod?: 'cash' | 'card';
   paidAt?: string;
   userId?: string;
+  // ETIMS validation data
+  etimsInvoiceNumber?: string;
+  verificationCode?: string;
+  qrCodeData?: string;
 }
 
 export interface Table {

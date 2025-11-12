@@ -1,19 +1,39 @@
 import type { Ticket } from '../types';
 
-export function printEtimmsReceipt(ticket: Ticket): void {
-  // Simulate ETIMMS data
+/**
+ * Generates a URL for a QR code image based on the ticket data.
+ * This function uses an external service (qrserver.com) to create the QR code.
+ * It prioritizes using the official `qrCodeData` from the ETIMS service if available,
+ * ensuring the QR code is verifiable. If not, it creates a fallback with essential details.
+ *
+ * @param ticket The ticket object containing the transaction details.
+ * @returns A URL string pointing to the generated QR code image.
+ */
+function generateQrCodeUrl(ticket: Ticket): string {
   const kraPin = "P000123456X";
-  const cuSerialNumber = "KRA-POS-001";
-  const invoiceNumber = `INV-${ticket.id.slice(-6)}`;
-  
-  // Data for QR code
-  const qrData = JSON.stringify({
+  const invoiceNumber = ticket.etimsInvoiceNumber || `INV-${ticket.id.slice(-6)}`;
+
+  // Use the official QR code data from the ETIMS service response if it exists.
+  // Otherwise, create a fallback JSON string with key details.
+  const qrCodeData = ticket.qrCodeData || JSON.stringify({
     invoice: invoiceNumber,
-    date: ticket.paidAt,
+    date: ticket.paidAt || new Date().toISOString(),
     total: ticket.total,
     pin: kraPin,
   });
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrData)}`;
+  
+  // Construct the URL for the QR code generation API.
+  return `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qrCodeData)}`;
+}
+
+export function printEtimmsReceipt(ticket: Ticket): void {
+  // Use official data if available, otherwise fallback to old simulation logic
+  const kraPin = "P000123456X";
+  const cuSerialNumber = "KRA-POS-001";
+  const invoiceNumber = ticket.etimsInvoiceNumber || `INV-${ticket.id.slice(-6)}`;
+  
+  // Generate the QR code URL using the helper function
+  const qrCodeUrl = generateQrCodeUrl(ticket);
 
   const content = `
     <html>
@@ -98,6 +118,7 @@ export function printEtimmsReceipt(ticket: Ticket): void {
         <div class="fiscal-info">
             <p><strong>Invoice No:</strong> ${invoiceNumber}</p>
             <p><strong>CU Serial No:</strong> ${cuSerialNumber}</p>
+            ${ticket.verificationCode ? `<p><strong>Ver. Code:</strong> ${ticket.verificationCode}</p>` : ''}
         </div>
         <div class="qr-code">
             <img src="${qrCodeUrl}" alt="QR Code" />
